@@ -1,3 +1,5 @@
+import LayoutNav from "@/shared/LayoutNav";
+import Providers from "@/shared/Providers";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -16,7 +18,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Providers>
+          <div className="flex h-screen overflow-y-hidden">
+            <LayoutNav />
+            <div className="h-full w-full overflow-auto p-10">{children}</div>
+          </div>
+        </Providers>
+      </body>
     </html>
   );
 }

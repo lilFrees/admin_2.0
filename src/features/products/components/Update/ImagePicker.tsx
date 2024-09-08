@@ -1,15 +1,14 @@
-import Image from "next/image";
-import { useQuery } from "react-query";
-import { FaPlus, FaTrash } from "react-icons/fa";
-import { useEffect, useRef, useState } from "react";
-import { MdEdit } from "react-icons/md";
 import { IconButton } from "@chakra-ui/react";
-import { useImageStore } from "../hooks/useImageStore";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { FaPlus, FaTrash } from "react-icons/fa";
+import { MdEdit } from "react-icons/md";
+import { useUpdateImageStore } from "../../hooks/useUpdateImageStore";
 
 function ImagePicker({ initialImages }: { initialImages: string[] }) {
   const [error, setError] = useState<string | null>(null);
   const { images, setImages, addImage, removeImage, updateImage } =
-    useImageStore();
+    useUpdateImageStore();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {

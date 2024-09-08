@@ -12,6 +12,7 @@ import { FaRegCircleXmark } from "react-icons/fa6";
 import ReactPaginate from "react-paginate";
 import ProductsTable from "./ProductsTable";
 import useProducts from "../hooks/useProducts";
+import Link from "next/link";
 
 function ProductPage() {
   const {
@@ -51,7 +52,9 @@ function ProductPage() {
           <Button colorScheme="green" variant="outline">
             Bulk import
           </Button>
-          <Button colorScheme="green">New</Button>
+          <Link href="/products/create">
+            <Button colorScheme="green">New</Button>
+          </Link>
         </div>
       </div>
       <ProductsTable products={products!} isLoading={isLoading} />

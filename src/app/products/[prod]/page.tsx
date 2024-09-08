@@ -1,4 +1,4 @@
-import ProductForm from "@/features/products/components/ProductForm";
+import UpdateForm from "@/features/products/components/Update/UpdateForm";
 import { getProductById } from "@/features/products/services/products-service";
 import { IconButton, Spinner } from "@chakra-ui/react";
 import Link from "next/link";
@@ -31,7 +31,7 @@ async function Page({
       </div>
       <div>
         <Suspense fallback={<Spinner />}>
-          <ProductForm product={product} />
+          <UpdateForm product={product} />
         </Suspense>
       </div>
     </div>

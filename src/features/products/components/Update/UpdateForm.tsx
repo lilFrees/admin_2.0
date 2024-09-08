@@ -1,5 +1,6 @@
 "use client";
 
+import { createClient } from "@/shared/supabase/client";
 import {
   Button,
   FormControl,
@@ -13,14 +14,13 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { IProduct } from "../interfaces/IProduct";
-import ImagePicker from "./ImagePicker";
-import { useImageStore } from "../hooks/useImageStore";
-import { createClient } from "@/shared/supabase/client";
 import imageCompression, { Options } from "browser-image-compression";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useUpdateImageStore } from "../../hooks/useUpdateImageStore";
+import { IProduct } from "../../interfaces/IProduct";
+import ImagePicker from "./ImagePicker";
 
 const schema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters long"),
@@ -44,11 +44,13 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-function ProductForm({ product }: { product: IProduct }) {
+function UpdateForm({ product }: { product: IProduct }) {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    getValues,
+    setValue,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
@@ -56,7 +58,7 @@ function ProductForm({ product }: { product: IProduct }) {
   const toast = useToast();
   const router = useRouter();
   const supabase = createClient();
-  const { images } = useImageStore();
+  const { images } = useUpdateImageStore();
 
   const onSubmit = async (formData: FormData) => {
     const convertedImg = await Promise.all(
@@ -109,8 +111,23 @@ function ProductForm({ product }: { product: IProduct }) {
       .eq("id", product.id)
       .single();
 
-    if (error) throw error.message;
+    const { data, error: listError } = await supabase.storage
+      .from("product_images")
+      .list(`product-id-${product.id}`);
 
+    if (listError) throw listError.message;
+
+    const numberOfItemsToDelete = data.length - convertedImg.length;
+
+    if (numberOfItemsToDelete > 0) {
+      const { error } = await supabase.storage
+        .from("product_images")
+        .remove([
+          ...data.slice(-numberOfItemsToDelete).map((item) => item.name),
+        ]);
+
+      if (error) throw error.message;
+    }
     toast({
       title: "Product Updated",
       description: "Product details have been updated successfully",
@@ -171,8 +188,25 @@ function ProductForm({ product }: { product: IProduct }) {
         </FormControl>
 
         {/* SKU */}
-        <FormControl isInvalid={!!errors.sku}>
-          <FormLabel htmlFor="sku">SKU</FormLabel>
+        <FormControl isInvalid={!!errors.sku} className="w-full">
+          <FormLabel
+            htmlFor="sku"
+            className="!flex w-full items-center justify-between"
+          >
+            <div>SKU</div>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() =>
+                setValue(
+                  "sku",
+                  Math.random().toString(36).substring(5).toUpperCase(),
+                )
+              }
+            >
+              Generate
+            </Button>
+          </FormLabel>
           <Input id="sku" defaultValue={product.sku} {...register("sku")} />
           <FormErrorMessage>{errors.sku?.message}</FormErrorMessage>
         </FormControl>
@@ -244,4 +278,4 @@ function ProductForm({ product }: { product: IProduct }) {
   );
 }
 
-export default ProductForm;
+export default UpdateForm;
